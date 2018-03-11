@@ -10,6 +10,7 @@ Welcome to databasedoc's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   tables
 
 
 Indices and tables
