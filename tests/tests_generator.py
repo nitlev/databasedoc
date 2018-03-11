@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from generate_docs import RSTDocument, RSTTableSection
 
@@ -52,7 +53,7 @@ class TestRSTTableSection:
         header, columns, widths = content.split("\n")[3:6]
         assert header == ".. csv-table::"
         assert columns == "   :header: Column name, Nullable, Comment"
-        assert widths == "   :widths: 15, 10, 30"
+        assert widths == "   :widths: 20, 20, 20"
 
     def test_section_with_empty_data_renders_metadata_only(self):
         # Given
@@ -79,14 +80,14 @@ class TestRSTTableSection:
 
         # Then
         rows = content.split("\n")[-4:-1]
-        assert rows[0] == "   id,False,"
-        assert rows[1] == "   name,True,"
-        assert rows[2] == "   email,False,staffer's email address"
+        assert rows[0] == '   "id","False",""'
+        assert rows[1] == '   "name","True",""'
+        assert rows[2] == '   "email","False","staffer\'s email address"'
 
     def test_section_with_more_data_renders_content(self):
         # Given
         data = pd.DataFrame([
-            ["id", False, ""],
+            ["id", False, np.nan],
             ["name", True, ""],
             ["email", False, "staffer's email address"],
             ["age", False, "sometime we know their age"]
@@ -100,7 +101,7 @@ class TestRSTTableSection:
         # Then
         rows = content.split("\n")[-5:-1]
         print(rows)
-        assert rows[0] == "   id,False,"
-        assert rows[1] == "   name,True,"
-        assert rows[2] == "   email,False,staffer's email address"
-        assert rows[3] == "   age,False,sometime we know their age"
+        assert rows[0] == '   "id","False",'
+        assert rows[1] == '   "name","True",""'
+        assert rows[2] == '   "email","False","staffer\'s email address"'
+        assert rows[3] == '   "age","False","sometime we know their age"'

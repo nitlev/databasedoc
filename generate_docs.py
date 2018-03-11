@@ -29,10 +29,11 @@ class RSTDocument(object):
 
 
 class RSTTableSection(object):
-    def __init__(self, table_name, data, header=None):
+    def __init__(self, table_name, data, header=None, widths=None):
         self.table_name = table_name
         self.header = header or [str(c) for c in data.columns]
         self.data = data
+        self.widths = widths or [20] * len(self.header)
 
     def render(self) -> str:
         return self._render_title() + \
@@ -46,9 +47,10 @@ class RSTTableSection(object):
 
     def _render_header(self) -> str:
         header_names = ", ".join(self.header)
+        widths = ", ".join((str(w) for w in self.widths))
         header = [".. csv-table::",
                   "   :header: {}".format(header_names),
-                  "   :widths: 15, 10, 30",
+                  "   :widths: {}".format(widths),
                   ""]
         return "\n".join(header)
 
@@ -59,19 +61,23 @@ class RSTTableSection(object):
         return "\n".join(body)
 
     def _render_row(self, row):
-        return "   " + ",".join(str(col) for col in row)
+        return "   " + ",".join(self._render_field(field) for field in row)
+
+    def _render_field(self, field):
+        return "\"{}\"".format(field) if pd.notnull(field) else ""
 
 
 def main():
     doc = RSTDocument()
     header = ["Column name", "Nullable", "Comment"]
+    widths = [15, 10, 30]
     data = pd.DataFrame([
         ["id", False, ""],
         ["name", True, ""],
         ["email", False, "staffer's email address"],
         ["age", False, "sometime we know their age"]
     ])
-    doc.add_section(RSTTableSection("First Table", data, header))
+    doc.add_section(RSTTableSection("First Table", data, header, widths))
     doc.save("./docs/source/tables.rst")
 
 
